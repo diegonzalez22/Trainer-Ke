@@ -1,0 +1,231 @@
+:root{
+  --grad: linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  --purple:#667eea;
+  --purple-d:#5a4a9f;
+  --ink:#2b2d42;
+  --muted:#6b7280;
+  --bg:#f4f5fb;
+  --card:#ffffff;
+  --line:#e7e8f0;
+  --danger:#ef4444;
+  --ok:#16a34a;
+  --radius:16px;
+  --shadow:0 2px 14px rgba(80,70,160,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  background:var(--bg);color:var(--ink);
+  overscroll-behavior-y:none;
+}
+.app{
+  max-width:520px;margin:0 auto;min-height:100%;
+  display:flex;flex-direction:column;position:relative;
+  background:var(--bg);
+}
+
+/* ---------- views ---------- */
+.view{display:none;flex:1;padding-bottom:92px}
+.view.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.page-header{padding:28px 20px 10px;padding-top:max(28px,env(safe-area-inset-top))}
+.page-header h1{font-size:1.7rem}
+.page-header p{color:var(--muted);font-size:.92rem;margin-top:2px}
+.screen-body{padding:12px 16px 20px}
+
+/* ---------- hero ---------- */
+.hero{
+  background:var(--grad);color:#fff;border-radius:0 0 26px 26px;
+  padding:20px 20px 26px;padding-top:max(22px,env(safe-area-inset-top));
+  box-shadow:0 8px 24px rgba(102,126,234,.28);
+}
+.hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.hero-greeting{font-size:.95rem;opacity:.92}
+.streak{background:rgba(255,255,255,.18);padding:5px 12px;border-radius:20px;font-size:.85rem;font-weight:600}
+.hero-level{font-size:1.75rem;line-height:1.1}
+.hero-sub{opacity:.9;font-size:.92rem;margin-top:6px}
+.level-progress{height:8px;background:rgba(255,255,255,.25);border-radius:6px;margin-top:16px;overflow:hidden}
+.level-progress-bar{height:100%;width:0;background:#fff;border-radius:6px;transition:width .5s ease}
+.level-progress-label{font-size:.8rem;opacity:.9;margin-top:7px}
+
+/* ---------- start button ---------- */
+.start-btn{
+  width:100%;border:none;cursor:pointer;color:#fff;background:var(--grad);
+  border-radius:var(--radius);padding:18px 20px;margin:4px 0 18px;
+  display:flex;align-items:center;gap:16px;text-align:left;
+  box-shadow:0 6px 18px rgba(102,126,234,.35);transition:transform .15s;
+}
+.start-btn:active{transform:scale(.98)}
+.start-btn-icon{
+  width:46px;height:46px;flex:none;border-radius:50%;
+  background:rgba(255,255,255,.22);display:grid;place-items:center;font-size:1.1rem
+}
+.start-btn-text strong{display:block;font-size:1.08rem}
+.start-btn-text small{opacity:.9;font-size:.82rem}
+
+/* ---------- cards ---------- */
+.card{background:var(--card);border-radius:var(--radius);padding:18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-soft{background:#f0f1fb}
+.card-title{font-size:1rem;margin-bottom:12px;color:var(--ink)}
+.tips-list{list-style:none;display:flex;flex-direction:column;gap:9px}
+.tips-list li{font-size:.9rem;color:var(--muted);padding-left:20px;position:relative;line-height:1.45}
+.tips-list li:before{content:"•";position:absolute;left:4px;color:var(--purple);font-weight:700}
+
+/* exercise rows on home */
+.ex-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.ex-row:last-child{border-bottom:none}
+.ex-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.ex-info{flex:1}
+.ex-info strong{display:block;font-size:.95rem}
+.ex-info small{color:var(--muted);font-size:.82rem}
+.ex-vol{font-size:.82rem;color:var(--purple);font-weight:600;text-align:right;white-space:nowrap}
+
+/* ---------- frecuencia (veces por día/semana) ---------- */
+.freq-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.freq-head .card-title{margin-bottom:0}
+.freq-count{font-size:.95rem;font-weight:700;color:var(--purple)}
+.freq-dots{display:flex;gap:8px;flex-wrap:wrap}
+.freq-dot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#eef0f6;color:#b9bcce;font-size:.95rem;font-weight:700;border:2px solid transparent}
+.freq-dot.filled{background:var(--grad);color:#fff}
+.freq-dot.extra{background:#dcfce7;color:var(--ok);border-color:var(--ok)}
+.freq-note{font-size:.84rem;color:var(--muted);margin-top:10px}
+.freq-note.complete{color:var(--ok);font-weight:600}
+
+/* ---------- banner ---------- */
+.banner{display:flex;align-items:center;gap:12px;border-radius:var(--radius);padding:14px;margin-bottom:16px}
+.banner-advance{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 6px 16px rgba(22,163,74,.3)}
+.banner-icon{font-size:1.6rem}
+.banner-text{flex:1;display:flex;flex-direction:column}
+.banner-text strong{font-size:.95rem}
+.banner-text span{font-size:.8rem;opacity:.92}
+
+/* ---------- buttons ---------- */
+.btn{border:none;border-radius:12px;font-size:.98rem;font-weight:600;cursor:pointer;padding:13px 16px;transition:transform .12s,opacity .12s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--grad);color:#fff}
+.btn-light{background:#eef0fb;color:var(--purple-d)}
+.btn-ghost{background:transparent;color:var(--muted)}
+.btn-danger{background:#fdecec;color:var(--danger)}
+.btn-block{width:100%;display:block}
+.btn-small{padding:8px 14px;font-size:.85rem}
+.btn-light.btn-small{background:rgba(255,255,255,.9);color:var(--ok)}
+
+/* ---------- workout ---------- */
+.view-workout{background:var(--grad);position:fixed;inset:0;z-index:200;display:none;flex-direction:column;padding-bottom:0}
+.view-workout.active{display:flex}
+.workout-header{padding:16px;padding-top:max(16px,env(safe-area-inset-top));display:flex;align-items:center;gap:14px}
+.workout-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:1.1rem;cursor:pointer;flex:none}
+.workout-progress-track{flex:1;height:6px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden}
+.workout-progress-fill{height:100%;width:0;background:#fff;transition:width .4s}
+
+.workout-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
+.workout-exercise{font-size:1.3rem;font-weight:700}
+.workout-setrep{opacity:.85;margin-top:4px;font-size:.95rem}
+
+.timer-ring-wrap{position:relative;width:260px;height:260px;margin:26px 0}
+.timer-ring{width:100%;height:100%;transform:rotate(-90deg)}
+.timer-ring-bg{fill:none;stroke:rgba(255,255,255,.2);stroke-width:12}
+.timer-ring-fg{fill:none;stroke:#fff;stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:628;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.timer-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.timer-count{font-size:4.6rem;font-weight:800;line-height:1}
+.timer-phase{font-size:1.15rem;text-transform:uppercase;letter-spacing:2px;margin-top:4px;opacity:.95}
+.workout-cue{font-size:1rem;opacity:.9;min-height:1.4em}
+.workout-controls{display:flex;gap:10px;margin-top:30px}
+.workout-controls .btn-ghost{color:#fff;background:rgba(255,255,255,.16)}
+
+/* phase tints */
+.phase-hold .timer-ring-fg{stroke:#fff}
+.phase-rest .timer-ring-fg{stroke:#c7f9cc}
+.phase-rest .timer-phase,.phase-rest .timer-count{color:#eafff0}
+
+/* ---------- workout done ---------- */
+.workout-done{position:absolute;inset:0;background:var(--bg);color:var(--ink);
+  padding:30px 22px;padding-top:max(40px,env(safe-area-inset-top));overflow-y:auto;display:flex;flex-direction:column}
+.done-check{width:72px;height:72px;border-radius:50%;background:var(--ok);color:#fff;
+  font-size:2.2rem;display:grid;place-items:center;margin:0 auto 16px}
+.workout-done h2{text-align:center;margin-bottom:6px}
+.done-summary{text-align:center;color:var(--muted);margin-bottom:24px}
+.done-field{margin-bottom:18px}
+.done-field label{display:block;font-weight:600;margin-bottom:8px;font-size:.92rem}
+.difficulty{display:flex;gap:8px}
+.difficulty button{flex:1;padding:12px 6px;border:2px solid var(--line);background:#fff;border-radius:12px;
+  font-size:.86rem;cursor:pointer;transition:all .15s}
+.difficulty button.sel{border-color:var(--purple);background:#eef0fb;color:var(--purple-d);font-weight:600}
+textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-family:inherit;
+  font-size:.95rem;resize:vertical;min-height:76px}
+
+/* ---------- levels page ---------- */
+.level-card{background:var(--card);border-radius:var(--radius);padding:16px;margin-bottom:12px;
+  box-shadow:var(--shadow);border-left:5px solid var(--purple);position:relative}
+.level-card.current{outline:2px solid var(--purple);outline-offset:1px}
+.level-card.locked{opacity:.62}
+.level-badge{display:inline-block;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:20px;margin-bottom:6px}
+.badge-current{background:var(--purple);color:#fff}
+.badge-done{background:var(--ok);color:#fff}
+.badge-locked{background:#e5e7eb;color:#9ca3af}
+.level-card h3{font-size:1.05rem}
+.level-card .wk{color:var(--muted);font-size:.82rem;margin:2px 0 8px}
+.level-card .goal{font-size:.88rem;color:var(--ink);margin-bottom:10px}
+.level-ex{font-size:.83rem;color:var(--muted);padding:3px 0}
+.level-ex b{color:var(--ink);font-weight:600}
+
+/* ---------- history ---------- */
+.hist-card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:11px;box-shadow:var(--shadow)}
+.hist-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.hist-date{font-weight:700;font-size:.92rem;text-transform:capitalize}
+.hist-diff{font-size:.78rem;padding:3px 9px;border-radius:20px;font-weight:600}
+.d1{background:#dcfce7;color:#15803d}.d2{background:#fef9c3;color:#a16207}.d3{background:#fee2e2;color:#b91c1c}
+.hist-meta{font-size:.82rem;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.hist-notes{font-size:.86rem;color:var(--ink);margin-top:8px;background:#f8f8fc;padding:8px 10px;border-radius:9px}
+.hist-del{background:none;border:none;color:var(--danger);font-size:.8rem;cursor:pointer;margin-top:8px}
+
+/* ---------- stats ---------- */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.stat{background:var(--grad);color:#fff;border-radius:var(--radius);padding:18px;text-align:center}
+.stat-value{font-size:2rem;font-weight:800}
+.stat-label{font-size:.8rem;opacity:.9;margin-top:2px}
+.cal-head,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cal-head{margin-bottom:8px;text-align:center;font-size:.72rem;color:var(--purple);font-weight:700}
+.cal-day{aspect-ratio:1;display:grid;place-items:center;border-radius:8px;font-size:.8rem;background:#eef0f6;color:#aaa;font-weight:600}
+.cal-day.done{background:var(--grad);color:#fff}
+.cal-day.today{outline:2px solid var(--purple)}
+.cal-day.blank{background:transparent}
+.lvl-bar{margin-bottom:12px}
+.lvl-bar-top{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:5px}
+.lvl-bar-track{height:8px;background:#eef0f6;border-radius:5px;overflow:hidden}
+.lvl-bar-fill{height:100%;background:var(--grad);border-radius:5px}
+
+/* ---------- settings ---------- */
+.row{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}
+.row:last-of-type{border-bottom:none}
+.row span{font-size:.94rem}
+.hint{font-size:.8rem;color:var(--muted);margin-top:10px;line-height:1.45}
+.select,input[type=time]{border:1px solid var(--line);border-radius:10px;padding:10px;font-size:.95rem;font-family:inherit}
+.select{width:100%}
+.version{text-align:center;color:#b9bcce;font-size:.8rem;margin-top:18px}
+
+/* switch */
+.switch{position:relative;width:46px;height:26px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:#cfd2e3;border-radius:26px;transition:.3s;cursor:pointer}
+.slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--purple)}
+input:checked+.slider:before{transform:translateX(20px)}
+
+/* ---------- tabbar ---------- */
+.tabbar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;background:#fff;
+  border-top:1px solid var(--line);display:flex;z-index:150;padding-bottom:env(safe-area-inset-bottom)}
+.tab{flex:1;border:none;background:none;padding:9px 4px 8px;font-size:.68rem;color:#9aa0b4;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px}
+.tab span{font-size:1.25rem;filter:grayscale(1);opacity:.6}
+.tab.active{color:var(--purple);font-weight:600}
+.tab.active span{filter:none;opacity:1}
+
+/* ---------- utils ---------- */
+.hidden{display:none !important}
+.empty-state{text-align:center;padding:50px 20px;color:#9aa0b4}
+.empty-icon{font-size:3rem;margin-bottom:12px}
+.empty-state small{display:block;margin-top:6px;font-size:.85rem}

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Kegel">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/styles.css">
+  <title>Kegel Trainer</title>
+</head>
+<body>
+  <div class="app">
+
+    <!-- ===== HOME ===== -->
+    <section id="view-home" class="view active">
+      <header class="hero">
+        <div class="hero-top">
+          <span class="hero-greeting" id="greeting">Hola</span>
+          <span class="streak" id="streakBadge">🔥 0</span>
+        </div>
+        <h1 class="hero-level" id="homeLevelName">Nivel 1</h1>
+        <p class="hero-sub" id="homeLevelGoal"></p>
+        <div class="level-progress">
+          <div class="level-progress-bar" id="levelProgressBar"></div>
+        </div>
+        <p class="level-progress-label" id="levelProgressLabel"></p>
+      </header>
+
+      <div class="screen-body">
+        <div id="advanceBanner" class="banner banner-advance hidden">
+          <div class="banner-icon">🎉</div>
+          <div class="banner-text">
+            <strong>¡Listo para subir de nivel!</strong>
+            <span id="advanceBannerSub"></span>
+          </div>
+          <button class="btn btn-small btn-light" id="advanceBtn">Subir</button>
+        </div>
+
+        <button class="start-btn" id="startWorkoutBtn">
+          <span class="start-btn-icon">▶</span>
+          <span class="start-btn-text">
+            <strong>Empezar sesión guiada</strong>
+            <small id="startBtnEstimate"></small>
+          </span>
+        </button>
+
+        <div class="card freq-card" id="freqCard">
+          <div class="freq-head">
+            <h3 class="card-title" id="freqTitle">Hoy</h3>
+            <span class="freq-count" id="freqCount">0 / 3</span>
+          </div>
+          <div class="freq-dots" id="freqDots"></div>
+          <p class="freq-note" id="freqNote"></p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Rutina de hoy</h3>
+          <div id="todayExercises"></div>
+        </div>
+
+        <div class="card card-soft">
+          <h3 class="card-title">Consejos del nivel</h3>
+          <ul id="homeTips" class="tips-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== WORKOUT (cronómetro) ===== -->
+    <section id="view-workout" class="view view-workout">
+      <div class="workout-header">
+        <button class="workout-close" id="workoutClose">✕</button>
+        <div class="workout-progress-track"><div id="workoutProgress" class="workout-progress-fill"></div></div>
+      </div>
+
+      <div class="workout-stage" id="workoutStage">
+        <p class="workout-exercise" id="woExercise">Ejercicio</p>
+        <p class="workout-setrep" id="woSetRep">Serie 1 · Rep 1</p>
+
+        <div class="timer-ring-wrap">
+          <svg class="timer-ring" viewBox="0 0 220 220">
+            <circle class="timer-ring-bg" cx="110" cy="110" r="100"></circle>
+            <circle class="timer-ring-fg" id="ringFg" cx="110" cy="110" r="100"></circle>
+          </svg>
+          <div class="timer-center">
+            <span class="timer-count" id="woCount">3</span>
+            <span class="timer-phase" id="woPhase">Prepárate</span>
+          </div>
+        </div>
+
+        <p class="workout-cue" id="woCue"></p>
+
+        <div class="workout-controls">
+          <button class="btn btn-ghost" id="woPauseBtn">Pausar</button>
+          <button class="btn btn-ghost" id="woSkipBtn">Saltar ejercicio</button>
+        </div>
+      </div>
+
+      <!-- resumen al terminar -->
+      <div class="workout-done hidden" id="workoutDone">
+        <div class="done-check">✓</div>
+        <h2>¡Sesión completada!</h2>
+        <p id="doneSummary" class="done-summary"></p>
+        <div class="done-field">
+          <label>¿Qué tan difícil estuvo?</label>
+          <div class="difficulty" id="difficultyPicker">
+            <button data-d="1">😌 Fácil</button>
+            <button data-d="2">😮‍💨 Normal</button>
+            <button data-d="3">🥵 Difícil</button>
+          </div>
+        </div>
+        <div class="done-field">
+          <label for="doneNotes">Notas (opcional)</label>
+          <textarea id="doneNotes" placeholder="Sensaciones control molestias..."></textarea>
+        </div>
+        <button class="btn btn-primary btn-block" id="saveSessionBtn">Guardar sesión</button>
+        <button class="btn btn-ghost btn-block" id="discardSessionBtn">Descartar</button>
+      </div>
+    </section>
+
+    <!-- ===== NIVELES ===== -->
+    <section id="view-levels" class="view">
+      <header class="page-header"><h1>Niveles</h1><p>Tu progresión completa</p></header>
+      <div class="screen-body" id="levelsList"></div>
+    </section>
+
+    <!-- ===== HISTORIAL ===== -->
+    <section id="view-history" class="view">
+      <header class="page-header"><h1>Historial</h1><p>Tus sesiones registradas</p></header>
+      <div class="screen-body">
+        <div id="historyList"></div>
+        <div class="empty-state hidden" id="historyEmpty">
+          <div class="empty-icon">📋</div>
+          <p>Aún no hay sesiones</p>
+          <small>Completa tu primera sesión guiada</small>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== STATS ===== -->
+    <section id="view-stats" class="view">
+      <header class="page-header"><h1>Progreso</h1><p>Tus números</p></header>
+      <div class="screen-body">
+        <div class="stats-grid">
+          <div class="stat"><div class="stat-value" id="stTotal">0</div><div class="stat-label">Sesiones</div></div>
+          <div class="stat"><div class="stat-value" id="stMonth">0</div><div class="stat-label">Este mes</div></div>
+          <div class="stat"><div class="stat-value" id="stStreak">0</div><div class="stat-label">Racha (días)</div></div>
+          <div class="stat"><div class="stat-value" id="stMinutes">0</div><div class="stat-label">Minutos</div></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" id="calTitle">Calendario</h3>
+          <div id="calendar"></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Sesiones por nivel</h3>
+          <div id="levelBars"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONFIG ===== -->
+    <section id="view-settings" class="view">
+      <header class="page-header"><h1>Ajustes</h1></header>
+      <div class="screen-body">
+        <div class="card">
+          <h3 class="card-title">Recordatorios</h3>
+          <div class="row">
+            <span>Recordatorio diario</span>
+            <label class="switch"><input type="checkbox" id="remDaily"><span class="slider"></span></label>
+          </div>
+          <div class="row" id="remTimeRow">
+            <span>Hora</span>
+            <input type="time" id="remTime" value="08:00">
+          </div>
+          <p class="hint">Los recordatorios usan las notificaciones del navegador. Mantén la app abierta o instálala en tu pantalla de inicio para que funcionen mejor.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Audio y vibración</h3>
+          <div class="row">
+            <span>Sonidos del cronómetro</span>
+            <label class="switch"><input type="checkbox" id="setSound" checked><span class="slider"></span></label>
+          </div>
+          <div class="row">
+            <span>Vibración</span>
+            <label class="switch"><input type="checkbox" id="setVibrate" checked><span class="slider"></span></label>
+          </div>
+          <div class="row">
+            <span>Cuenta regresiva por voz</span>
+            <label class="switch"><input type="checkbox" id="setVoice"><span class="slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Nivel actual</h3>
+          <select id="manualLevel" class="select"></select>
+          <p class="hint">Normalmente la app te sugiere cuándo subir. Aquí puedes cambiarlo manualmente.</p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Datos</h3>
+          <button class="btn btn-light btn-block" id="exportBtn">📥 Exportar copia de seguridad</button>
+          <label class="btn btn-light btn-block" style="margin-top:8px;cursor:pointer">
+            📤 Importar copia
+            <input type="file" id="importFile" accept="application/json" hidden>
+          </label>
+          <button class="btn btn-danger btn-block" id="resetBtn" style="margin-top:8px">🗑️ Borrar todo</button>
+        </div>
+
+        <p class="version">Kegel Trainer · v2.0</p>
+      </div>
+    </section>
+
+    <!-- ===== NAV ===== -->
+    <nav class="tabbar">
+      <button class="tab active" data-view="home"><span>🏠</span>Inicio</button>
+      <button class="tab" data-view="levels"><span>📈</span>Niveles</button>
+      <button class="tab" data-view="history"><span>📋</span>Historial</button>
+      <button class="tab" data-view="stats"><span>📊</span>Progreso</button>
+      <button class="tab" data-view="settings"><span>⚙️</span>Ajustes</button>
+    </nav>
+  </div>
+
+  <script src="js/levels.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
