@@ -228,9 +228,10 @@ function startWorkout(){
   workout = {
     steps: buildSteps(lvl),
     i: 0,
-    remaining: 0,
     paused: false,
-    timer: null,
+    raf: null,
+    completeTimer: null,
+    aborted: false,
     startedAt: Date.now(),
   };
   document.getElementById("workoutDone").classList.add("hidden");
@@ -240,14 +241,19 @@ function startWorkout(){
   runStep();
 }
 
+// Longitud del trazo del anillo (un poco mayor que la circunferencia real 2πr≈628.3
+// para que al llegar a lleno el círculo cierre por completo sin dejar hueco).
+const RING_CIRC = 634;
+
 function runStep(){
   const w = workout;
+  if(!w || w.aborted) return;
+  if(w.completeTimer){ clearTimeout(w.completeTimer); w.completeTimer = null; }
   if(w.i >= w.steps.length){ finishWorkout(); return; }
   const step = w.steps[w.i];
-  w.remaining = step.seconds;
 
   const stage = document.getElementById("workoutStage");
-  stage.className = "workout-stage phase-"+(step.phase==="hold"?"hold":(step.phase==="prepare"?"hold":"rest"));
+  stage.className = "workout-stage phase-"+((step.phase==="rest"||step.phase==="setrest")?"rest":"hold");
 
   document.getElementById("woExercise").textContent = step.ex || "Preparación";
   document.getElementById("woSetRep").textContent = step.set
@@ -255,43 +261,55 @@ function runStep(){
     : "";
   document.getElementById("woPhase").textContent = step.label;
   document.getElementById("woCue").textContent = step.cue || "";
-  updateCount(step.seconds, step.seconds, true);
-  updateProgress();
 
-  cue(step.phase); // sonido/vibración al iniciar fase
-
-  clearInterval(w.timer);
-  w.timer = setInterval(tick, 1000);
-}
-
-function tick(){
-  const w = workout;
-  if(w.paused) return;
-  w.remaining--;
-  const step = w.steps[w.i];
-  updateCount(w.remaining, step.seconds);
-
-  if(w.remaining <= 0){
-    clearInterval(w.timer);
-    flashRing();            // destello al completar el círculo
-    vibrate(90);
-    w.i++;
-    runStep();
-  } else if(w.remaining <= 3 && step.phase!=="setrest"){
-    beep(600, 0.06); // ticks finales
-  }
-}
-
-function updateCount(rem, total, instant){
-  document.getElementById("woCount").textContent = Math.max(0, rem);
+  // anillo vacío al iniciar la fase. Lo movemos frame a frame (sin transición CSS).
   const ring = document.getElementById("ringFg");
-  const circ = 628; // 2*pi*100
-  // El anillo se LLENA conforme avanza el tiempo y completa el círculo justo al llegar a 0.
-  // offset = circ al inicio (vacío) -> 0 al final (lleno)
-  const off = total>0 ? circ*(rem/total) : 0;
-  if(instant){ ring.style.transition = "none"; }        // al iniciar fase: resetea a vacío sin animar hacia atrás
-  ring.style.strokeDashoffset = off;
-  if(instant){ void ring.getBoundingClientRect(); ring.style.transition = ""; }
+  ring.style.transition = "none";
+  ring.style.strokeDashoffset = RING_CIRC;
+  document.getElementById("woCount").textContent = step.seconds;
+  updateProgress();
+  cue(step.phase);
+
+  w.duration    = step.seconds * 1000;
+  w.phaseStart  = performance.now();
+  w.pausedAccum = 0;
+  w.lastBeepSec = null;
+  cancelAnimationFrame(w.raf);
+  w.raf = requestAnimationFrame(frameTick);
+}
+
+// Bucle de animación en tiempo real: el anillo se llena según el tiempo transcurrido
+// de verdad y completa el círculo exactamente al terminar la fase.
+function frameTick(now){
+  const w = workout;
+  if(!w || w.aborted) return;
+  if(w.paused){ w.raf = requestAnimationFrame(frameTick); return; }
+
+  const elapsed = now - w.phaseStart - w.pausedAccum;
+  let p = w.duration > 0 ? elapsed / w.duration : 1;
+  if(p < 0) p = 0; if(p > 1) p = 1;
+
+  const ring = document.getElementById("ringFg");
+  ring.style.strokeDashoffset = RING_CIRC * (1 - p);   // vacío -> lleno
+
+  const remSec = Math.max(0, Math.ceil((w.duration - elapsed) / 1000));
+  document.getElementById("woCount").textContent = remSec;
+
+  const step = w.steps[w.i];
+  if(remSec > 0 && remSec <= 3 && step.phase !== "setrest" && remSec !== w.lastBeepSec){
+    beep(600, 0.06); w.lastBeepSec = remSec;           // ticks finales
+  }
+
+  if(p >= 1){
+    ring.style.strokeDashoffset = 0;                   // círculo completo
+    document.getElementById("woCount").textContent = 0;
+    flashRing();                                       // destello
+    vibrate(90);
+    // breve pausa para que se vea el círculo lleno antes de la siguiente fase
+    w.completeTimer = setTimeout(()=>{ w.completeTimer = null; w.i++; runStep(); }, 320);
+    return;
+  }
+  w.raf = requestAnimationFrame(frameTick);
 }
 
 function flashRing(){
@@ -337,19 +355,25 @@ function cue(phase){
 
 /* controles */
 document.getElementById("woPauseBtn").addEventListener("click",function(){
-  workout.paused = !workout.paused;
-  this.textContent = workout.paused ? "Reanudar" : "Pausar";
+  const w = workout; if(!w) return;
+  w.paused = !w.paused;
+  if(w.paused){ w.pauseStart = performance.now(); }
+  else { w.pausedAccum += performance.now() - w.pauseStart; }  // descuenta el tiempo en pausa
+  this.textContent = w.paused ? "Reanudar" : "Pausar";
 });
 document.getElementById("woSkipBtn").addEventListener("click",()=>{
   // salta al siguiente ejercicio distinto
-  const w = workout; const curEx = w.steps[w.i].ex;
-  clearInterval(w.timer);
+  const w = workout; if(!w) return;
+  cancelAnimationFrame(w.raf);
+  if(w.completeTimer){ clearTimeout(w.completeTimer); w.completeTimer = null; }
+  const curEx = w.steps[w.i].ex;
   while(w.i < w.steps.length && w.steps[w.i].ex === curEx) w.i++;
   runStep();
 });
 document.getElementById("workoutClose").addEventListener("click",()=>{
   if(confirm("¿Salir de la sesión? No se guardará.")){
-    clearInterval(workout.timer);
+    const w = workout;
+    if(w){ w.aborted = true; cancelAnimationFrame(w.raf); if(w.completeTimer) clearTimeout(w.completeTimer); }
     document.getElementById("view-workout").classList.remove("active");
     showView("home");
   }
@@ -361,7 +385,8 @@ document.getElementById("startWorkoutBtn").addEventListener("click",startWorkout
    ============================================================ */
 let pendingDifficulty = 2;
 function finishWorkout(){
-  clearInterval(workout.timer);
+  cancelAnimationFrame(workout.raf);
+  if(workout.completeTimer){ clearTimeout(workout.completeTimer); workout.completeTimer = null; }
   const mins = Math.max(1, Math.round((Date.now()-workout.startedAt)/60000));
   document.getElementById("workoutStage").style.display = "none";
   const done = document.getElementById("workoutDone");
@@ -606,6 +631,55 @@ function scheduleReminder(){
 if("serviceWorker" in navigator){
   window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js").catch(()=>{}));
 }
+
+/* ============================================================
+   SESIÓN MANUAL
+   ============================================================ */
+let mManualDiff = 2;
+
+function openManual(){
+  document.getElementById("mFecha").value = todayISO();
+  document.getElementById("mNivel").innerHTML =
+    LEVELS.map((l,i)=>`<option value="${i}" ${i===state.levelIdx?"selected":""}>${l.name}</option>`).join("");
+  document.getElementById("mNotas").value = "";
+  mManualDiff = 2;
+  document.querySelectorAll("#mDificultad button").forEach(b=>b.classList.toggle("sel", b.dataset.d==="2"));
+  document.getElementById("manualModal").classList.remove("hidden");
+}
+function closeManual(){ document.getElementById("manualModal").classList.add("hidden"); }
+
+document.getElementById("openManualBtn").addEventListener("click", openManual);
+document.getElementById("cancelManualBtn").addEventListener("click", closeManual);
+document.getElementById("manualModal").addEventListener("click", e=>{ if(e.target.id==="manualModal") closeManual(); });
+
+document.querySelectorAll("#mDificultad button").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    mManualDiff = parseInt(b.dataset.d);
+    document.querySelectorAll("#mDificultad button").forEach(x=>x.classList.remove("sel"));
+    b.classList.add("sel");
+  });
+});
+
+document.getElementById("saveManualBtn").addEventListener("click", ()=>{
+  const fecha = document.getElementById("mFecha").value;
+  if(!fecha){ alert("Elige una fecha."); return; }
+  const idx = parseInt(document.getElementById("mNivel").value);
+  state.sessions.push({
+    id: Date.now(),
+    date: fecha,
+    time: "—",
+    levelIdx: idx,
+    levelName: LEVELS[idx].name,
+    minutes: levelDuration(LEVELS[idx]),
+    difficulty: mManualDiff,
+    notes: document.getElementById("mNotas").value.trim(),
+    manual: true,
+  });
+  save(KEY.sessions, state.sessions);
+  closeManual();
+  renderHome();
+  alert("Sesión registrada.");
+});
 
 /* ============================================================
    INIT

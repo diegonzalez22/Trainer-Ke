@@ -48,6 +48,8 @@
           </span>
         </button>
 
+        <button class="manual-btn" id="openManualBtn">＋ Registrar sesión manual</button>
+
         <div class="card freq-card" id="freqCard">
           <div class="freq-head">
             <h3 class="card-title" id="freqTitle">Hoy</h3>
@@ -215,6 +217,38 @@
         <p class="version">Kegel Trainer · v2.0</p>
       </div>
     </section>
+
+    <!-- ===== MODAL SESIÓN MANUAL ===== -->
+    <div id="manualModal" class="modal hidden">
+      <div class="modal-card">
+        <h2 class="modal-title">Registrar sesión manual</h2>
+        <p class="modal-sub">Para anotar una sesión que ya hiciste sin el cronómetro.</p>
+
+        <div class="done-field">
+          <label for="mFecha">Fecha</label>
+          <input type="date" id="mFecha">
+        </div>
+        <div class="done-field">
+          <label for="mNivel">Nivel</label>
+          <select id="mNivel" class="select"></select>
+        </div>
+        <div class="done-field">
+          <label>Dificultad</label>
+          <div class="difficulty" id="mDificultad">
+            <button data-d="1">😌 Fácil</button>
+            <button data-d="2">😮‍💨 Normal</button>
+            <button data-d="3">🥵 Difícil</button>
+          </div>
+        </div>
+        <div class="done-field">
+          <label for="mNotas">Notas (opcional)</label>
+          <textarea id="mNotas" placeholder="Sensaciones control..."></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="saveManualBtn">Guardar sesión</button>
+        <button class="btn btn-ghost btn-block" id="cancelManualBtn">Cancelar</button>
+      </div>
+    </div>
 
     <!-- ===== NAV ===== -->
     <nav class="tabbar">
