@@ -255,7 +255,7 @@ function runStep(){
     : "";
   document.getElementById("woPhase").textContent = step.label;
   document.getElementById("woCue").textContent = step.cue || "";
-  updateCount(step.seconds, step.seconds);
+  updateCount(step.seconds, step.seconds, true);
   updateProgress();
 
   cue(step.phase); // sonido/vibración al iniciar fase
@@ -273,6 +273,8 @@ function tick(){
 
   if(w.remaining <= 0){
     clearInterval(w.timer);
+    flashRing();            // destello al completar el círculo
+    vibrate(90);
     w.i++;
     runStep();
   } else if(w.remaining <= 3 && step.phase!=="setrest"){
@@ -280,12 +282,24 @@ function tick(){
   }
 }
 
-function updateCount(rem, total){
+function updateCount(rem, total, instant){
   document.getElementById("woCount").textContent = Math.max(0, rem);
   const ring = document.getElementById("ringFg");
   const circ = 628; // 2*pi*100
-  const frac = total>0 ? (rem/total) : 0;
-  ring.style.strokeDashoffset = circ*(1-frac);
+  // El anillo se LLENA conforme avanza el tiempo y completa el círculo justo al llegar a 0.
+  // offset = circ al inicio (vacío) -> 0 al final (lleno)
+  const off = total>0 ? circ*(rem/total) : 0;
+  if(instant){ ring.style.transition = "none"; }        // al iniciar fase: resetea a vacío sin animar hacia atrás
+  ring.style.strokeDashoffset = off;
+  if(instant){ void ring.getBoundingClientRect(); ring.style.transition = ""; }
+}
+
+function flashRing(){
+  const wrap = document.querySelector(".timer-ring-wrap");
+  if(!wrap) return;
+  wrap.classList.remove("flash");
+  void wrap.offsetWidth;   // reinicia la animación
+  wrap.classList.add("flash");
 }
 
 function updateProgress(){
