@@ -1,5 +1,6 @@
-/* Service worker — cachea la app para uso offline */
-const CACHE = "kegel-v6";
+/* Service worker — estrategia "red primero": siempre trae lo último si hay internet,
+   y usa la copia guardada solo cuando estás sin señal. */
+const CACHE = "kegel-v7";
 const ASSETS = [
   "./",
   "./index.html",
@@ -25,10 +26,14 @@ self.addEventListener("activate", e => {
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
   e.respondWith(
-    caches.match(e.request).then(hit => hit || fetch(e.request).then(res => {
+    fetch(e.request).then(res => {
+      // guarda una copia fresca para uso offline
       const copy = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, copy)).catch(() => {});
       return res;
-    }).catch(() => caches.match("./index.html")))
+    }).catch(() =>
+      // sin internet: usa lo guardado, o el index como respaldo
+      caches.match(e.request).then(hit => hit || caches.match("./index.html"))
+    )
   );
 });
