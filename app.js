@@ -47,12 +47,14 @@ function sessionsAtLevel(idx){
   return state.sessions.filter(s=>s.levelIdx===idx).length;
 }
 
-function todayISO(){ return new Date().toISOString().split("T")[0]; }
+// Fecha local del dispositivo en formato YYYY-MM-DD (NO UTC, para que el "día" cambie a la medianoche local)
+function localISO(d){ d = d || new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
+function todayISO(){ return localISO(); }
 function countToday(){ return state.sessions.filter(s=>s.date===todayISO()).length; }
 function weekStartISO(){
   const d=new Date(); const day=(d.getDay()+6)%7; // lunes=0
   d.setDate(d.getDate()-day); d.setHours(0,0,0,0);
-  return d.toISOString().split("T")[0];
+  return localISO(d);
 }
 function countThisWeek(){
   const start=weekStartISO();
@@ -371,7 +373,7 @@ document.getElementById("saveSessionBtn").addEventListener("click",()=>{
   const now = new Date();
   state.sessions.push({
     id: Date.now(),
-    date: now.toISOString().split("T")[0],
+    date: localISO(now),
     time: now.toTimeString().slice(0,5),
     levelIdx: state.levelIdx,
     levelName: currentLevel().name,
@@ -430,10 +432,10 @@ function calcStreak(){
   let streak = 0;
   let d = new Date();
   // si hoy no hay sesión empezamos a contar desde ayer
-  const todayStr = d.toISOString().split("T")[0];
+  const todayStr = localISO(d);
   if(!days.has(todayStr)) d.setDate(d.getDate()-1);
   for(;;){
-    const str = d.toISOString().split("T")[0];
+    const str = localISO(d);
     if(days.has(str)){ streak++; d.setDate(d.getDate()-1); }
     else break;
   }
@@ -453,7 +455,7 @@ function renderStats(){
   const y=now.getFullYear(), m=now.getMonth();
   const first=new Date(y,m,1).getDay(), days=new Date(y,m+1,0).getDate();
   const doneDays=new Set(s.map(x=>x.date));
-  const todayStr=now.toISOString().split("T")[0];
+  const todayStr=localISO(now);
   document.getElementById("calTitle").textContent =
     now.toLocaleDateString("es-MX",{month:"long",year:"numeric"}).replace(/^\w/,c=>c.toUpperCase());
   const head=["D","L","M","M","J","V","S"].map(x=>`<div>${x}</div>`).join("");

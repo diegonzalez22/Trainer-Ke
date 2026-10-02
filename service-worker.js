@@ -1,5 +1,5 @@
 /* Service worker — cachea la app para uso offline */
-const CACHE = "kegel-v3";
+const CACHE = "kegel-v4";
 const ASSETS = [
   "./",
   "./index.html",
