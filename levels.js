@@ -31,6 +31,7 @@ const LEVELS = [
         cue: "Contrae suave"
       }
     ],
+    weeksToAdvance: 2,
     sessionsToAdvance: 12,
     tips: [
       "Acuéstate boca arriba con las rodillas dobladas para aislar mejor el músculo.",
@@ -59,6 +60,7 @@ const LEVELS = [
         cue: "Rápido"
       }
     ],
+    weeksToAdvance: 3,
     sessionsToAdvance: 15,
     tips: [
       "Puedes empezar a hacerlo sentado además de acostado.",
@@ -93,6 +95,7 @@ const LEVELS = [
         cue: "Sube la intensidad"
       }
     ],
+    weeksToAdvance: 4,
     sessionsToAdvance: 18,
     tips: [
       "En las ondas sube la fuerza en 4 escalones: 25 / 50 / 75 / 100 por ciento.",
@@ -127,7 +130,8 @@ const LEVELS = [
         cue: "Sube la intensidad"
       }
     ],
-    sessionsToAdvance: 20,
+    weeksToAdvance: 3,
+    sessionsToAdvance: 9,
     tips: [
       "Con 3 sesiones por semana basta para mantener en este nivel.",
       "Si quieres seguir progresando pasa al Nivel 5 avanzado.",
@@ -161,7 +165,8 @@ const LEVELS = [
         cue: "Empuja suave y relaja"
       }
     ],
-    sessionsToAdvance: 20,
+    weeksToAdvance: 4,
+    sessionsToAdvance: 16,
     tips: [
       "El reverse kegel relaja el suelo pélvico. Es clave para equilibrar tanta contracción.",
       "No hagas reverse con fuerza. Es soltar y expandir no pujar duro.",
@@ -201,7 +206,8 @@ const LEVELS = [
         cue: "Suelta y expande"
       }
     ],
-    sessionsToAdvance: 24,
+    weeksToAdvance: 6,
+    sessionsToAdvance: 12,
     tips: [
       "Si sientes tensión o molestia pélvica baja un nivel y haz más reverse kegels.",
       "La calidad de la contracción importa más que el número.",
@@ -241,6 +247,7 @@ const LEVELS = [
         cue: "Suelta y expande"
       }
     ],
+    weeksToAdvance: null,
     sessionsToAdvance: null,
     tips: [
       "Este es el nivel permanente. Mantén 2 a 3 sesiones por semana.",

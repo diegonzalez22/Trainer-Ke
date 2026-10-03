@@ -1,6 +1,6 @@
 /* Service worker — estrategia "red primero": siempre trae lo último si hay internet,
    y usa la copia guardada solo cuando estás sin señal. */
-const CACHE = "kegel-v8";
+const CACHE = "kegel-v9";
 const ASSETS = [
   "./",
   "./index.html",

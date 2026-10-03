@@ -20,15 +20,17 @@ Todos los datos se guardan **solo en tu teléfono** (localStorage). No hay servi
 
 ## Los niveles
 
-| Nivel | Enfoque | Contracción / descanso | Volumen | Frecuencia | Avanza tras |
-|------|---------|------------------------|---------|-----------|-------------|
-| 1 · Base | Identificar el músculo | 3s / 3s | 10×3 | 3 al día | 12 sesiones |
-| 2 · Progresión | Más tiempo + pulsos | 5s / 5s + pulsos | 8×3 | 3 al día | 15 sesiones |
-| 3 · Fuerza | Máxima contracción + ondas | 10s / 10s | 5×3 | 2 al día | 18 sesiones |
-| 4 · Mantenimiento | Combinado | mixto | — | 3 por semana | 20 sesiones |
-| 5 · Resistencia | Tiempos largos + reverse | 15s / 10s | 5×3 | 4 por semana | 20 sesiones |
-| 6 · Fuerza máxima | Picos de 20s | 20s / 10s | 4×3 | 2 por semana | 24 sesiones |
+| Nivel | Enfoque | Contracción / descanso | Volumen | Frecuencia | Duración mínima |
+|------|---------|------------------------|---------|-----------|-----------------|
+| 1 · Base | Identificar el músculo | 3s / 3s | 10×3 | 3 al día | ~2 semanas (mín. 12 ses.) |
+| 2 · Progresión | Más tiempo + pulsos | 5s / 5s + pulsos | 8×3 | 3 al día | ~3 semanas (mín. 15 ses.) |
+| 3 · Fuerza | Máxima contracción + ondas | 10s / 10s | 5×3 | 2 al día | ~4 semanas (mín. 18 ses.) |
+| 4 · Mantenimiento | Combinado | mixto | — | 3 por semana | ~3 semanas (mín. 9 ses.) |
+| 5 · Resistencia | Tiempos largos + reverse | 15s / 10s | 5×3 | 4 por semana | ~4 semanas (mín. 16 ses.) |
+| 6 · Fuerza máxima | Picos de 20s | 20s / 10s | 4×3 | 2 por semana | ~6 semanas (mín. 12 ses.) |
 | 7 · Elite | Protocolo permanente | mixto | — | 3 por semana | permanente |
+
+> **Cómo se sube de nivel:** la app te habilita el siguiente nivel cuando se cumplen **las dos cosas**: pasó el tiempo mínimo en semanas *y* hiciste al menos las sesiones indicadas. El músculo del suelo pélvico se adapta con el tiempo, no por acumular sesiones en pocos días, así que no se puede "correr" el programa haciendo muchas sesiones de golpe.
 
 > Los **reverse kegels** (relajación controlada) aparecen desde el nivel 5. Son clave para equilibrar tanta contracción y evitar sobre-tensión del suelo pélvico.
 

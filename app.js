@@ -47,6 +47,19 @@ function sessionsAtLevel(idx){
   return state.sessions.filter(s=>s.levelIdx===idx).length;
 }
 
+// Fecha de la primera sesión registrada en un nivel (cuándo empezó ese nivel)
+function levelStartDate(idx){
+  const dates = state.sessions.filter(s=>s.levelIdx===idx).map(s=>s.date).sort();
+  return dates.length ? dates[0] : null;
+}
+// Semanas transcurridas desde que empezó el nivel (0 si aún no hay sesiones)
+function weeksOnLevel(idx){
+  const start = levelStartDate(idx);
+  if(!start) return 0;
+  const ms = Date.now() - new Date(start+"T00:00:00").getTime();
+  return ms / (7*24*3600*1000);
+}
+
 // Fecha local del dispositivo en formato YYYY-MM-DD (NO UTC, para que el "día" cambie a la medianoche local)
 function localISO(d){ d = d || new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const dd=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${dd}`; }
 function todayISO(){ return localISO(); }
@@ -111,13 +124,15 @@ function recentEase(idx){
 
 function canAdvance(){
   const lvl = currentLevel();
-  if(lvl.sessionsToAdvance == null) return false;      // nivel permanente
+  if(lvl.sessionsToAdvance == null || lvl.weeksToAdvance == null) return false; // nivel permanente
   if(state.levelIdx >= LEVELS.length-1) return false;
   const done = sessionsAtLevel(state.levelIdx);
+  const wks  = weeksOnLevel(state.levelIdx);
+  // Avanza solo cuando pasó el tiempo mínimo Y hay constancia de sesiones.
   if(done < lvl.sessionsToAdvance) return false;
+  if(wks  < lvl.weeksToAdvance)    return false;
   const ease = recentEase(state.levelIdx);
-  // habilita si ya hizo las sesiones; el "ease" refina el mensaje
-  return { done, ease };
+  return { done, ease, wks };
 }
 
 function levelDuration(lvl){
@@ -138,15 +153,21 @@ function renderHome(){
   document.getElementById("startBtnEstimate").textContent = "≈ "+levelDuration(lvl)+" min · "+lvl.exercises.length+" ejercicios";
   document.getElementById("streakBadge").textContent = "🔥 "+calcStreak();
 
-  // barra de progreso del nivel
+  // progreso del nivel: tiempo mínimo + constancia de sesiones
   const done = sessionsAtLevel(state.levelIdx);
-  const target = lvl.sessionsToAdvance;
   const bar = document.getElementById("levelProgressBar");
   const label = document.getElementById("levelProgressLabel");
-  if(target){
-    const pct = Math.min(100, Math.round(done/target*100));
-    bar.style.width = pct+"%";
-    label.textContent = `${done} / ${target} sesiones para el siguiente nivel`;
+  if(lvl.weeksToAdvance){
+    const wks = weeksOnLevel(state.levelIdx);
+    const wkProgress = Math.min(1, wks/lvl.weeksToAdvance);
+    const sProgress  = Math.min(1, done/lvl.sessionsToAdvance);
+    bar.style.width = Math.round(Math.min(wkProgress, sProgress)*100)+"%";
+    if(!levelStartDate(state.levelIdx)){
+      label.textContent = `Dura ~${lvl.weeksToAdvance} ${lvl.weeksToAdvance===1?"semana":"semanas"}. Empieza tu primera sesión`;
+    } else {
+      const curWeek = Math.min(lvl.weeksToAdvance, Math.floor(wks)+1);
+      label.textContent = `Semana ${curWeek} de ${lvl.weeksToAdvance} · ${done}/${lvl.sessionsToAdvance} sesiones`;
+    }
   } else {
     bar.style.width = "100%";
     label.textContent = "Nivel permanente de mantenimiento";
@@ -177,7 +198,7 @@ function renderHome(){
     banner.classList.remove("hidden");
     const easyNote = (adv.ease!=null && adv.ease<=EASE_THRESHOLD)
       ? "Tus últimas sesiones se sintieron fáciles."
-      : "Ya completaste las sesiones recomendadas.";
+      : "Cumpliste el tiempo y las sesiones recomendadas.";
     document.getElementById("advanceBannerSub").textContent = easyNote+" Pasa a "+LEVELS[state.levelIdx+1].name+".";
   } else {
     banner.classList.add("hidden");
@@ -530,7 +551,9 @@ function renderLevels(){
     else { badge=`<span class="level-badge badge-locked">Próximo</span>`; cls+=" locked"; }
     const exs = lvl.exercises.map(ex=>
       `<div class="level-ex"><b>${ex.name}</b> — ${ex.hold}s/${ex.rest}s · ${ex.reps}×${ex.sets}</div>`).join("");
-    const adv = lvl.sessionsToAdvance ? `Avanza tras ${lvl.sessionsToAdvance} sesiones` : "Nivel permanente";
+    const adv = lvl.weeksToAdvance
+      ? `Dura ~${lvl.weeksToAdvance} ${lvl.weeksToAdvance===1?"semana":"semanas"} · mín. ${lvl.sessionsToAdvance} sesiones`
+      : "Nivel permanente";
     return `<div class="${cls}" style="border-left-color:${lvl.color}">
       ${badge}
       <h3>${lvl.name}</h3>
