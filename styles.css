@@ -157,6 +157,10 @@ body{
 .phase-hold .timer-phase{color:#ffe6a8}
 .phase-rest .timer-phase,.phase-rest .timer-count{color:#d6fff0}
 
+/* transición entre ejercicios: color neutro para que no se confunda con contraer/relajar */
+.phase-getready .timer-ring-fg{stroke:#aeb8ff}
+.phase-getready .timer-phase,.phase-getready .timer-count{color:#e9ecff}
+
 /* destello al completar el círculo */
 @keyframes ringFlash{
   0%{filter:drop-shadow(0 0 0 rgba(255,255,255,0));transform:scale(1)}

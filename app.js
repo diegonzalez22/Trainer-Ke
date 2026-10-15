@@ -227,9 +227,17 @@ document.getElementById("advanceBtn").addEventListener("click",()=>{
    ============================================================ */
 let workout = null;
 
+const GETREADY_SECONDS = 8;  // transición entre un ejercicio y el siguiente
+
 function buildSteps(lvl){
   const steps = [{phase:"prepare", seconds:5, label:"Prepárate", cue:"Ponte cómodo", ex:"", set:0, rep:0, sets:0, reps:0}];
-  lvl.exercises.forEach(ex=>{
+  lvl.exercises.forEach((ex, exIdx)=>{
+    // antes de cada ejercicio (menos el primero) una pantalla de aviso para reubicarse
+    if(exIdx > 0){
+      steps.push({phase:"getready", seconds:GETREADY_SECONDS, label:"Prepárate · siguiente",
+        cue:`${ex.hold}s contrae · ${ex.rest}s relaja · ${ex.reps} reps`,
+        ex:ex.name, set:0, rep:0, sets:ex.sets, reps:ex.reps});
+    }
     for(let s=1; s<=ex.sets; s++){
       for(let r=1; r<=ex.reps; r++){
         steps.push({phase:"hold", seconds:ex.hold, label:"Contrae", cue:ex.cue, ex:ex.name, set:s, rep:r, sets:ex.sets, reps:ex.reps, type:ex.type});
@@ -273,12 +281,14 @@ function runStep(){
   if(w.i >= w.steps.length){ finishWorkout(); return; }
   const step = w.steps[w.i];
 
+  const calm = (step.phase==="rest"||step.phase==="setrest"||step.phase==="getready");
   const stage = document.getElementById("workoutStage");
-  stage.className = "workout-stage phase-"+((step.phase==="rest"||step.phase==="setrest")?"rest":"hold");
+  stage.className = "workout-stage phase-"+(calm?"rest":"hold")+(step.phase==="getready"?" phase-getready":"");
 
   document.getElementById("woExercise").textContent = step.ex || "Preparación";
-  document.getElementById("woSetRep").textContent = step.set
-    ? `Serie ${step.set}/${step.sets}` + (step.rep?` · Rep ${step.rep}/${step.reps}`:"")
+  document.getElementById("woSetRep").textContent =
+    step.phase==="getready" ? "Siguiente ejercicio"
+    : step.set ? `Serie ${step.set}/${step.sets}` + (step.rep?` · Rep ${step.rep}/${step.reps}`:"")
     : "";
   document.getElementById("woPhase").textContent = step.label;
   document.getElementById("woCue").textContent = step.cue || "";
@@ -289,7 +299,7 @@ function runStep(){
   ring.style.strokeDashoffset = RING_CIRC;
   document.getElementById("woCount").textContent = step.seconds;
   updateProgress();
-  cue(step.phase);
+  cue(step);
 
   w.duration    = step.seconds * 1000;
   w.phaseStart  = performance.now();
@@ -367,10 +377,12 @@ function speak(text){
   const u = new SpeechSynthesisUtterance(text); u.lang="es-ES"; u.rate=1;
   speechSynthesis.cancel(); speechSynthesis.speak(u);
 }
-function cue(phase){
+function cue(step){
+  const phase = typeof step === "string" ? step : step.phase;
   if(phase==="hold"){ beep(880,0.15); vibrate(120); speak("Contrae"); }
   else if(phase==="rest"){ beep(440,0.15); vibrate(60); speak("Relaja"); }
   else if(phase==="setrest"){ beep(330,0.2); vibrate([80,60,80]); speak("Descansa"); }
+  else if(phase==="getready"){ beep(520,0.22); vibrate([70,50,70]); speak("Prepárate. Ahora "+(step.ex||"")); }
   else if(phase==="prepare"){ speak("Prepárate"); }
 }
 
