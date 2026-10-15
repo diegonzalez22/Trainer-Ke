@@ -65,7 +65,7 @@ const LEVELS = [
     tips: [
       "Puedes empezar a hacerlo sentado además de acostado.",
       "Si llegas al final de la serie sin perder fuerza vas bien.",
-      "Progresa el hold de 5 a 7 a 10 seg dentro de estas semanas si lo sientes fácil."
+      "Sube la contracción con el control +/- de Inicio cuando la sientas fácil (de 5 hacia 7 y 10 seg)."
     ]
   },
   {

@@ -4,9 +4,10 @@
    ============================================================ */
 
 const KEY = {
-  sessions: "kt_sessions",
-  level:    "kt_level",
-  settings: "kt_settings",
+  sessions:  "kt_sessions",
+  level:     "kt_level",
+  settings:  "kt_settings",
+  holdBonus: "kt_holdbonus",
 };
 
 const DEFAULT_SETTINGS = {
@@ -22,9 +23,15 @@ let state = {
   sessions: load(KEY.sessions, []),
   levelIdx: load(KEY.level, 0),              // índice en LEVELS (0 = nivel 1)
   settings: Object.assign({}, DEFAULT_SETTINGS, load(KEY.settings, {})),
+  holdBonus: load(KEY.holdBonus, {}),        // segundos extra de contracción por nivel { idx: seg }
 };
 
 const currentLevel = () => LEVELS[state.levelIdx];
+
+const HOLD_BONUS_MAX = 10;                   // tope de segundos extra que se pueden sumar
+const getHoldBonus = (idx) => state.holdBonus[idx] || 0;
+// primer ejercicio de tipo "standard" (sostenidas/máximas) — el que acepta ajuste de contracción
+const standardExercise = (lvl) => lvl.exercises.find(e => e.type === "standard") || null;
 
 /* ============================================================
    NAVEGACIÓN
@@ -115,6 +122,35 @@ function renderFreq(){
   }
 }
 
+function renderHoldAdjust(){
+  const wrap = document.getElementById("holdAdjust");
+  const lvl = currentLevel();
+  const ex = standardExercise(lvl);
+  if(!ex){ wrap.innerHTML = ""; return; }        // nivel sin ejercicio de contracción sostenida
+  const bonus = getHoldBonus(state.levelIdx);
+  const total = ex.hold + bonus;
+  wrap.innerHTML = `
+    <div class="hold-adjust">
+      <div class="hold-adjust-label">Contracción sostenida<small>Súbela cuando la sientas fácil</small></div>
+      <div class="hold-stepper">
+        <button id="holdMinus" ${bonus<=0?"disabled":""}>−</button>
+        <span id="holdVal">${total}s</span>
+        <button id="holdPlus" ${bonus>=HOLD_BONUS_MAX?"disabled":""}>+</button>
+      </div>
+    </div>`;
+  document.getElementById("holdMinus").addEventListener("click", ()=>changeHold(-1));
+  document.getElementById("holdPlus").addEventListener("click", ()=>changeHold(1));
+}
+
+function changeHold(delta){
+  let bonus = getHoldBonus(state.levelIdx) + delta;
+  if(bonus < 0) bonus = 0;
+  if(bonus > HOLD_BONUS_MAX) bonus = HOLD_BONUS_MAX;
+  state.holdBonus[state.levelIdx] = bonus;
+  save(KEY.holdBonus, state.holdBonus);
+  renderHome();
+}
+
 function recentEase(idx){
   const recent = state.sessions.filter(s=>s.levelIdx===idx).slice(-EASE_WINDOW);
   if(recent.length < EASE_WINDOW) return null;
@@ -173,17 +209,22 @@ function renderHome(){
     label.textContent = "Nivel permanente de mantenimiento";
   }
 
-  // ejercicios de hoy
+  // ejercicios de hoy (las sostenidas muestran el hold ya ajustado)
+  const bonus = getHoldBonus(state.levelIdx);
   const exWrap = document.getElementById("todayExercises");
-  exWrap.innerHTML = lvl.exercises.map(ex=>`
+  exWrap.innerHTML = lvl.exercises.map(ex=>{
+    const hold = ex.type==="standard" ? ex.hold + bonus : ex.hold;
+    return `
     <div class="ex-row">
       <span class="ex-dot" style="background:${lvl.color}"></span>
       <div class="ex-info">
         <strong>${ex.name}</strong>
-        <small>${ex.hold}s contrae · ${ex.rest}s descansa</small>
+        <small>${hold}s contrae · ${ex.rest}s descansa</small>
       </div>
       <div class="ex-vol">${ex.reps}×${ex.sets}</div>
-    </div>`).join("");
+    </div>`;}).join("");
+
+  renderHoldAdjust();
 
   // contador de frecuencia (veces por día / semana)
   renderFreq();
@@ -230,19 +271,21 @@ let workout = null;
 const GETREADY_SECONDS = 8;  // transición entre un ejercicio y el siguiente
 
 function buildSteps(lvl){
+  const bonus = getHoldBonus(state.levelIdx);   // segundos extra solo para ejercicios "standard"
   const steps = [{phase:"prepare", seconds:5, label:"Prepárate", cue:"Ponte cómodo", ex:"", set:0, rep:0, sets:0, reps:0}];
   lvl.exercises.forEach((ex, exIdx)=>{
+    const hold = ex.type === "standard" ? ex.hold + bonus : ex.hold;
     // antes de cada ejercicio (menos el primero) una pantalla de aviso para reubicarse
     if(exIdx > 0){
       steps.push({phase:"getready", seconds:GETREADY_SECONDS, label:"Prepárate · siguiente",
-        cue:`${ex.hold}s contrae · ${ex.rest}s relaja · ${ex.reps} reps`,
+        cue:`${hold}s contrae · ${ex.rest}s relaja · ${ex.reps} reps`,
         ex:ex.name, set:0, rep:0, sets:ex.sets, reps:ex.reps});
     }
     for(let s=1; s<=ex.sets; s++){
       for(let r=1; r<=ex.reps; r++){
-        steps.push({phase:"hold", seconds:ex.hold, label:"Contrae", cue:ex.cue, ex:ex.name, set:s, rep:r, sets:ex.sets, reps:ex.reps, type:ex.type});
-        // último rep de la última serie no necesita rest largo, igual damos el rest normal salvo el final
-        steps.push({phase:"rest", seconds:ex.rest, label:"Relaja", cue:"Suelta", ex:ex.name, set:s, rep:r, sets:ex.sets, reps:ex.reps});
+        const last = (r === ex.reps);   // última repetición de la serie
+        steps.push({phase:"hold", seconds:hold, label:"Contrae", cue:ex.cue, ex:ex.name, set:s, rep:r, sets:ex.sets, reps:ex.reps, type:ex.type, last});
+        steps.push({phase:"rest", seconds:ex.rest, label:"Relaja", cue:"Suelta", ex:ex.name, set:s, rep:r, sets:ex.sets, reps:ex.reps, last});
       }
       if(s < ex.sets && ex.setRest){
         steps.push({phase:"setrest", seconds:ex.setRest, label:"Descanso", cue:"Respira. Viene la serie "+(s+1), ex:ex.name, set:s, rep:0, sets:ex.sets, reps:ex.reps});
@@ -290,6 +333,11 @@ function runStep(){
     step.phase==="getready" ? "Siguiente ejercicio"
     : step.set ? `Serie ${step.set}/${step.sets}` + (step.rep?` · Rep ${step.rep}/${step.reps}`:"")
     : "";
+
+  // aviso de última repetición de la serie (visible junto al contador)
+  const woLast = document.getElementById("woLast");
+  if(step.last && (step.phase==="hold" || step.phase==="rest")) woLast.classList.remove("hidden");
+  else woLast.classList.add("hidden");
   document.getElementById("woPhase").textContent = step.label;
   document.getElementById("woCue").textContent = step.cue || "";
 
@@ -611,7 +659,7 @@ document.getElementById("manualLevel").addEventListener("change",e=>{
 
 /* exportar / importar / borrar */
 document.getElementById("exportBtn").addEventListener("click",()=>{
-  const data={sessions:state.sessions,levelIdx:state.levelIdx,settings:state.settings,exported:new Date().toISOString()};
+  const data={sessions:state.sessions,levelIdx:state.levelIdx,settings:state.settings,holdBonus:state.holdBonus,exported:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
   const a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
@@ -627,6 +675,7 @@ document.getElementById("importFile").addEventListener("change",e=>{
       if(d.sessions){ state.sessions=d.sessions; save(KEY.sessions,state.sessions); }
       if(typeof d.levelIdx==="number"){ state.levelIdx=d.levelIdx; save(KEY.level,state.levelIdx); }
       if(d.settings){ state.settings=Object.assign({},DEFAULT_SETTINGS,d.settings); save(KEY.settings,state.settings); }
+      if(d.holdBonus){ state.holdBonus=d.holdBonus; save(KEY.holdBonus,state.holdBonus); }
       renderHome(); renderSettings();
       alert("Copia importada correctamente.");
     }catch{ alert("Archivo no válido."); }
@@ -635,8 +684,8 @@ document.getElementById("importFile").addEventListener("change",e=>{
 });
 document.getElementById("resetBtn").addEventListener("click",()=>{
   if(confirm("Esto borra TODAS tus sesiones y progreso. ¿Seguro?") && confirm("No se puede deshacer. ¿Confirmas?")){
-    localStorage.removeItem(KEY.sessions); localStorage.removeItem(KEY.level); localStorage.removeItem(KEY.settings);
-    state={sessions:[],levelIdx:0,settings:Object.assign({},DEFAULT_SETTINGS)};
+    localStorage.removeItem(KEY.sessions); localStorage.removeItem(KEY.level); localStorage.removeItem(KEY.settings); localStorage.removeItem(KEY.holdBonus);
+    state={sessions:[],levelIdx:0,settings:Object.assign({},DEFAULT_SETTINGS),holdBonus:{}};
     renderHome(); renderSettings(); showView("home");
   }
 });

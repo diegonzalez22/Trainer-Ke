@@ -108,6 +108,18 @@ body{
 .freq-note{font-size:.84rem;color:var(--muted);margin-top:10px}
 .freq-note.complete{color:var(--ok);font-weight:600}
 
+/* ---------- ajuste de contracción (hold) ---------- */
+.hold-adjust{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.hold-adjust-label{font-size:.9rem;font-weight:600;display:flex;flex-direction:column}
+.hold-adjust-label small{font-weight:400;color:var(--muted);font-size:.78rem;margin-top:2px}
+.hold-stepper{display:flex;align-items:center;gap:10px;flex:none}
+.hold-stepper button{width:38px;height:38px;border:none;border-radius:10px;background:#eef0fb;color:var(--purple-d);
+  font-size:1.4rem;font-weight:700;cursor:pointer;line-height:1}
+.hold-stepper button:active{background:#e0e3f6}
+.hold-stepper button:disabled{opacity:.4}
+.hold-stepper span{min-width:42px;text-align:center;font-weight:700;color:var(--purple)}
+
 /* ---------- banner ---------- */
 .banner{display:flex;align-items:center;gap:12px;border-radius:var(--radius);padding:14px;margin-bottom:16px}
 .banner-advance{background:linear-gradient(135deg,#16a34a,#15803d);color:#fff;box-shadow:0 6px 16px rgba(22,163,74,.3)}
@@ -138,6 +150,11 @@ body{
 .workout-stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px}
 .workout-exercise{font-size:1.3rem;font-weight:700}
 .workout-setrep{opacity:.85;margin-top:4px;font-size:.95rem}
+/* aviso de última repetición, compacto para caber dentro del círculo bajo "CONTRAE" */
+.wo-last{margin-top:8px;background:rgba(255,211,110,.22);color:#ffe6a8;border:1px solid rgba(255,211,110,.6);
+  padding:3px 11px;border-radius:20px;font-size:.72rem;font-weight:700;letter-spacing:.5px;
+  white-space:nowrap;animation:lastPulse 1.4s ease-in-out infinite}
+@keyframes lastPulse{0%,100%{opacity:.8}50%{opacity:1}}
 
 .timer-ring-wrap{position:relative;width:260px;height:260px;margin:26px 0}
 .timer-ring{width:100%;height:100%;transform:rotate(-90deg)}
